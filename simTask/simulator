@@ -1,0 +1,66 @@
+#!/bin/bash
+
+RED='\033[91m'
+GREEN='\033[92m'
+RESET='\033[0m'
+
+step=0
+hits=0
+misses=0
+last_numbers=()
+
+while true; do
+    step=$((step + 1))
+    random_number=$((RANDOM % 10))
+    last_numbers+=("$random_number")
+    if [ ${#last_numbers[@]} -gt 10 ]; then
+        last_numbers=("${last_numbers[@]:1}")
+    fi
+
+    while true; do
+        read -p "Step: $step
+Please enter number from 0 to 9 (q - quit): " user_input
+
+        if [ "$user_input" == "q" ]; then
+            echo "Exiting..."
+            exit 0
+        fi
+
+        if [[ "$user_input" =~ ^[0-9]$ ]]; then
+            user_number=$user_input
+            break
+        else
+            echo "Input error!"
+        fi
+    done
+
+    if [ "$user_number" -eq "$random_number" ]; then
+        echo -e "${GREEN}Hit! My number: $random_number${RESET}"
+        hits=$((hits + 1))
+    else
+        echo -e "${RED}Miss! My number: $random_number${RESET}"
+        misses=$((misses + 1))
+    fi
+
+    total=$((hits + misses))
+    if [ "$total" -gt 0 ]; then
+        hit_percent=$((hits * 100 / total))
+        miss_percent=$((misses * 100 / total))
+    else
+        hit_percent=0
+        miss_percent=0
+    fi
+
+    echo "Hit: ${hit_percent}% Miss: ${miss_percent}%"
+
+    colored_numbers=()
+    for num in "${last_numbers[@]}"; do
+        if [ "$num" -eq "$random_number" ] && [ "$user_number" -eq "$random_number" ]; then
+            colored_numbers+=("${GREEN}${num}${RESET}")
+        else
+            colored_numbers+=("${RED}${num}${RESET}")
+        fi
+    done
+
+    echo -e "Numbers: ${colored_numbers[*]}\n"
+done
